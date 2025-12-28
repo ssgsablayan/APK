@@ -171,9 +171,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoadingProfile) {
-      return const Scaffold(
-        appBar: AppBar(title: Text('Settings')),
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        appBar: AppBar(title: const Text('Settings')),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 

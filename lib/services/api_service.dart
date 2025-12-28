@@ -65,10 +65,20 @@ class ApiService {
   
   // Auth endpoints
   Future<Map<String, dynamic>> login(String email, String password) async {
-    final response = await post('/api/login', body: {
-      'email': email,
-      'password': password,
-    });
+    // Login is a public endpoint, don't send token
+    final headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+    
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/login'),
+      headers: headers,
+      body: jsonEncode({
+        'email': email,
+        'password': password,
+      }),
+    );
     
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -77,7 +87,18 @@ class ApiService {
       }
       return data;
     }
-    throw Exception('Login failed: ${response.body}');
+    
+    // Parse error response
+    try {
+      final errorData = jsonDecode(response.body);
+      final errorMessage = errorData['error'] ?? 'Login failed';
+      throw Exception(errorMessage);
+    } catch (e) {
+      if (e is Exception) {
+        rethrow;
+      }
+      throw Exception('Login failed: ${response.body}');
+    }
   }
   
   // Dashboard

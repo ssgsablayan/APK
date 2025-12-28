@@ -115,8 +115,38 @@ class _ClearanceScreenState extends State<ClearanceScreen> {
             
             // Action Button
             ElevatedButton.icon(
-              onPressed: () {
-                // Request all clearances
+              onPressed: _isLoading ? null : () async {
+                try {
+                  setState(() => _isLoading = true);
+                  final apiService = Provider.of<ApiService>(context, listen: false);
+                  final response = await apiService.post('/api/clearance/request-all');
+                  if (response.statusCode == 200) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('All clearances requested successfully'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                      _loadClearances();
+                    }
+                  } else {
+                    throw Exception('Failed to request clearances');
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Failed to request clearances: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                } finally {
+                  if (mounted) {
+                    setState(() => _isLoading = false);
+                  }
+                }
               },
               icon: const Icon(Icons.add),
               label: const Text('Request All Clearances'),
